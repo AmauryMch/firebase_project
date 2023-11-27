@@ -4,31 +4,43 @@ import 'pages/signin_page.dart';
 import 'firebase_options.dart';
 import 'pages/loggin_page.dart';
 
+// Fonction principale qui initialise Firebase et lance l'application
 void main() async {
+  // S'assure que la liaison des widgets est initialisée
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialise Firebase avec les options par défaut pour la plateforme actuelle
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Lance l'application en créant une instance de MyApp
   runApp(MyApp());
 }
 
+// Classe principale représentant l'application Flutter
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  // Méthode de construction de l'interface utilisateur de l'application
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // Configuration générale de l'application
       title: 'Flutter Demo',
       theme: ThemeData(
+        // Configuration du thème, notamment la couleur de base
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      // Page d'accueil de l'application, dans ce cas, la page de connexion
       home: LoginPage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
+// Classe représentant la page d'accueil de l'application
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -38,10 +50,13 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+// Classe d'état pour la page d'accueil de l'application
 class _MyHomePageState extends State<MyHomePage> {
+  // Méthode de construction de l'interface utilisateur de la page d'accueil
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Barre d'app avec un fond de couleur issu du thème défini
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),

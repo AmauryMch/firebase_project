@@ -17,11 +17,11 @@ class FirestorePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notes'),
+        title: const Text('Notes'),
         actions: [
           // Bouton de déconnexion
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               Navigator.of(context).pushReplacement(
@@ -36,11 +36,11 @@ class FirestorePage extends StatelessWidget {
         stream: notes.where('userId', isEqualTo: user?.uid).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Text('Something went wrong');
+            return const Text('Something went wrong');
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Text("Loading");
+            return const Text("Loading");
           }
 
           // Affichage de la liste des notes
@@ -56,7 +56,7 @@ class FirestorePage extends StatelessWidget {
                   if (direction == DismissDirection.endToStart) {
                     await notes.doc(document.id).delete();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text('Note supprimée'),
                       ),
                     );
@@ -64,8 +64,8 @@ class FirestorePage extends StatelessWidget {
                 },
                 background: Container(
                   color: Colors.red,
-                  padding: EdgeInsets.only(right: 16.0),
-                  child: Align(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: const Align(
                     alignment: Alignment.centerRight,
                     child: Icon(
                       Icons.delete,
@@ -103,7 +103,7 @@ class FirestorePage extends StatelessWidget {
                       ),
                       if (!(data['isCompleted'] ?? false))
                         IconButton(
-                          icon: Icon(Icons.edit),
+                          icon: const Icon(Icons.edit),
                           onPressed: () {
                             _showEditNoteDialog(
                               context,
@@ -129,7 +129,7 @@ class FirestorePage extends StatelessWidget {
         onPressed: () {
           _showNoteDialog(context, notes, user?.uid);
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -141,7 +141,7 @@ class FirestorePage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Nouvelle Note'),
+          title: const Text('Nouvelle Note'),
           content: Form(
             child: SingleChildScrollView(
               child: Column(
@@ -149,11 +149,11 @@ class FirestorePage extends StatelessWidget {
                 children: [
                   TextFormField(
                     controller: titleController,
-                    decoration: InputDecoration(labelText: 'Titre'),
+                    decoration: const InputDecoration(labelText: 'Titre'),
                   ),
                   TextFormField(
                     controller: contentController,
-                    decoration: InputDecoration(labelText: 'Contenu'),
+                    decoration: const InputDecoration(labelText: 'Contenu'),
                     maxLines: null,
                   ),
                 ],
@@ -166,7 +166,7 @@ class FirestorePage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Annuler'),
+              child: const Text('Annuler'),
             ),
             // Bouton pour enregistrer la nouvelle note
             ElevatedButton(
@@ -174,7 +174,7 @@ class FirestorePage extends StatelessWidget {
                 if (titleController.text.trim().isEmpty ||
                     contentController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('Veuillez remplir tous les champs'),
                       duration: Duration(seconds: 3),
                     ),
@@ -192,7 +192,7 @@ class FirestorePage extends StatelessWidget {
                   Navigator.of(context).pop();
                 }
               },
-              child: Text('Enregistrer'),
+              child: const Text('Enregistrer'),
             ),
           ],
         );
@@ -217,7 +217,7 @@ class FirestorePage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Modifier la Note'),
+          title: const Text('Modifier la Note'),
           content: Form(
             child: SingleChildScrollView(
               child: Column(
@@ -225,11 +225,11 @@ class FirestorePage extends StatelessWidget {
                 children: [
                   TextFormField(
                     controller: titleController,
-                    decoration: InputDecoration(labelText: 'Titre'),
+                    decoration: const InputDecoration(labelText: 'Titre'),
                   ),
                   TextFormField(
                     controller: contentController,
-                    decoration: InputDecoration(labelText: 'Contenu'),
+                    decoration: const InputDecoration(labelText: 'Contenu'),
                     maxLines: null,
                   ),
                 ],
@@ -242,7 +242,7 @@ class FirestorePage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Annuler'),
+              child: const Text('Annuler'),
             ),
             // Bouton pour enregistrer les modifications de la note
             ElevatedButton(
@@ -250,7 +250,7 @@ class FirestorePage extends StatelessWidget {
                 if (titleController.text.trim().isEmpty ||
                     contentController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('Veuillez remplir tous les champs'),
                       duration: Duration(seconds: 3),
                     ),
@@ -265,7 +265,7 @@ class FirestorePage extends StatelessWidget {
 
                   // Afficher un message de confirmation
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('Note modifiée avec succès'),
                     ),
                   );
@@ -275,7 +275,7 @@ class FirestorePage extends StatelessWidget {
                   Navigator.of(context).pop();
                 }
               },
-              child: Text('Enregistrer'),
+              child: const Text('Enregistrer'),
             ),
           ],
         );
