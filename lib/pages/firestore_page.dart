@@ -1,13 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'loggin_page.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 // Page principale pour gérer les notes dans Firestore
 class FirestorePage extends StatelessWidget {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
-  final TextEditingController imageUrlController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +60,12 @@ class FirestorePage extends StatelessWidget {
                 direction: DismissDirection.endToStart,
                 onDismissed: (direction) async {
                   if (direction == DismissDirection.endToStart) {
+                    if (imageUrl.isNotEmpty) {
+                      Reference storageReference =
+                          FirebaseStorage.instance.refFromURL(imageUrl);
+                      await storageReference.delete();
+                    }
+
                     await notes.doc(document.id).delete();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -149,12 +158,14 @@ class FirestorePage extends StatelessWidget {
     );
   }
 
-  // Afficher une boîte de dialogue pour ajouter une nouvelle note
+  // Affiche une boîte de dialogue pour ajouter une nouvelle note
   void _showNoteDialog(
       BuildContext context, CollectionReference notes, String? userId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        String imageUrl = '';
+
         return AlertDialog(
           title: const Text('Nouvelle Note'),
           content: Form(
@@ -171,10 +182,27 @@ class FirestorePage extends StatelessWidget {
                     decoration: const InputDecoration(labelText: 'Contenu'),
                     maxLines: null,
                   ),
-                  TextFormField(
-                    controller: imageUrlController,
-                    decoration:
-                        const InputDecoration(labelText: 'URL de l\'image'),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final picker = ImagePicker();
+                      final pickedFile =
+                          await picker.pickImage(source: ImageSource.gallery);
+
+                      if (pickedFile != null) {
+                        Reference storageReference = FirebaseStorage.instance
+                            .ref()
+                            .child('images/${DateTime.now().toString()}');
+                        UploadTask uploadTask =
+                            storageReference.putFile(File(pickedFile.path));
+
+                        await uploadTask.whenComplete(() async {
+                          imageUrl = await storageReference.getDownloadURL();
+                        });
+                      } else {
+                        print('Aucune image sélectionnée');
+                      }
+                    },
+                    child: const Text('Uploader l\'image'),
                   ),
                 ],
               ),
@@ -200,17 +228,16 @@ class FirestorePage extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // Ajouter la nouvelle note à la collection Firestore
                   await notes.add({
                     'title': titleController.text,
                     'content': contentController.text,
                     'userId': userId,
                     'isCompleted': false,
-                    'imageUrl': imageUrlController.text,
+                    'imageUrl': imageUrl,
                   });
+
                   titleController.clear();
                   contentController.clear();
-                  imageUrlController.clear();
 
                   Navigator.of(context).pop();
                 }
@@ -223,7 +250,7 @@ class FirestorePage extends StatelessWidget {
     );
   }
 
-  // Afficher une boîte de dialogue pour modifier une note existante
+  // Affiche une boîte de dialogue pour modifier une note existante
   void _showEditNoteDialog(
     BuildContext context,
     CollectionReference notes,
@@ -236,11 +263,11 @@ class FirestorePage extends StatelessWidget {
   ) {
     titleController.text = title;
     contentController.text = content;
-    imageUrlController.text = imageUrl;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        String newImageUrl = imageUrl;
         return AlertDialog(
           title: const Text('Modifier la Note'),
           content: Form(
@@ -257,10 +284,27 @@ class FirestorePage extends StatelessWidget {
                     decoration: const InputDecoration(labelText: 'Contenu'),
                     maxLines: null,
                   ),
-                  TextFormField(
-                    controller: imageUrlController,
-                    decoration:
-                        const InputDecoration(labelText: 'URL de l\'image'),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final picker = ImagePicker();
+                      final pickedFile =
+                          await picker.pickImage(source: ImageSource.gallery);
+
+                      if (pickedFile != null) {
+                        Reference storageReference = FirebaseStorage.instance
+                            .ref()
+                            .child('images/${DateTime.now().toString()}');
+                        UploadTask uploadTask =
+                            storageReference.putFile(File(pickedFile.path));
+
+                        await uploadTask.whenComplete(() async {
+                          newImageUrl = await storageReference.getDownloadURL();
+                        });
+                      } else {
+                        print('Aucune image sélectionnée');
+                      }
+                    },
+                    child: const Text('Modifier l\'image'),
                   ),
                 ],
               ),
@@ -272,7 +316,6 @@ class FirestorePage extends StatelessWidget {
               onPressed: () {
                 titleController.clear();
                 contentController.clear();
-                imageUrlController.clear();
 
                 Navigator.of(context).pop();
               },
@@ -295,7 +338,6 @@ class FirestorePage extends StatelessWidget {
                     'title': titleController.text,
                     'content': contentController.text,
                     'userId': userId,
-                    'imageUrl': imageUrlController.text,
                   });
 
                   // Afficher un message de confirmation
@@ -307,7 +349,6 @@ class FirestorePage extends StatelessWidget {
 
                   titleController.clear();
                   contentController.clear();
-                  imageUrlController.clear();
 
                   Navigator.of(context).pop();
                 }
