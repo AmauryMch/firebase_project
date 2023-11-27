@@ -7,6 +7,7 @@ import 'loggin_page.dart';
 class FirestorePage extends StatelessWidget {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
+  final TextEditingController imageUrlController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +49,8 @@ class FirestorePage extends StatelessWidget {
             children: snapshot.data!.docs.map((DocumentSnapshot document) {
               Map<String, dynamic> data =
                   document.data()! as Map<String, dynamic>;
+              String imageUrl = data['imageUrl'] ?? '';
+
               // Composant Dismissible pour permettre la suppression de la note
               return Dismissible(
                 key: Key(document.id),
@@ -83,14 +86,25 @@ class FirestorePage extends StatelessWidget {
                           : TextDecoration.none,
                     ),
                   ),
-                  subtitle: Text(
-                    data['content'],
-                    style: TextStyle(
-                      decoration: data['isCompleted'] ?? false
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
-                    ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data['content'],
+                        style: TextStyle(
+                          decoration: data['isCompleted'] ?? false
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                        ),
+                      ),
+                      if (imageUrl.isNotEmpty)
+                        Image.network(
+                          imageUrl,
+                          height: 100.0,
+                        ),
+                    ],
                   ),
+
                   // Cases à cocher et bouton d'édition de la note
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -113,6 +127,7 @@ class FirestorePage extends StatelessWidget {
                               data['content'],
                               data['isCompleted'] ?? false,
                               document.id,
+                              data['imageUrl'],
                             );
                           },
                         ),
@@ -156,6 +171,11 @@ class FirestorePage extends StatelessWidget {
                     decoration: const InputDecoration(labelText: 'Contenu'),
                     maxLines: null,
                   ),
+                  TextFormField(
+                    controller: imageUrlController,
+                    decoration:
+                        const InputDecoration(labelText: 'URL de l\'image'),
+                  ),
                 ],
               ),
             ),
@@ -186,9 +206,12 @@ class FirestorePage extends StatelessWidget {
                     'content': contentController.text,
                     'userId': userId,
                     'isCompleted': false,
+                    'imageUrl': imageUrlController.text,
                   });
                   titleController.clear();
                   contentController.clear();
+                  imageUrlController.clear();
+
                   Navigator.of(context).pop();
                 }
               },
@@ -209,9 +232,11 @@ class FirestorePage extends StatelessWidget {
     String content,
     bool isCompleted,
     String documentId,
+    String imageUrl,
   ) {
     titleController.text = title;
     contentController.text = content;
+    imageUrlController.text = imageUrl;
 
     showDialog(
       context: context,
@@ -232,6 +257,11 @@ class FirestorePage extends StatelessWidget {
                     decoration: const InputDecoration(labelText: 'Contenu'),
                     maxLines: null,
                   ),
+                  TextFormField(
+                    controller: imageUrlController,
+                    decoration:
+                        const InputDecoration(labelText: 'URL de l\'image'),
+                  ),
                 ],
               ),
             ),
@@ -240,6 +270,10 @@ class FirestorePage extends StatelessWidget {
             // Bouton d'annulation
             ElevatedButton(
               onPressed: () {
+                titleController.clear();
+                contentController.clear();
+                imageUrlController.clear();
+
                 Navigator.of(context).pop();
               },
               child: const Text('Annuler'),
@@ -261,6 +295,7 @@ class FirestorePage extends StatelessWidget {
                     'title': titleController.text,
                     'content': contentController.text,
                     'userId': userId,
+                    'imageUrl': imageUrlController.text,
                   });
 
                   // Afficher un message de confirmation
@@ -272,6 +307,8 @@ class FirestorePage extends StatelessWidget {
 
                   titleController.clear();
                   contentController.clear();
+                  imageUrlController.clear();
+
                   Navigator.of(context).pop();
                 }
               },
