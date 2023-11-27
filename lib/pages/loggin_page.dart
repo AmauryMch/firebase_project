@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'logged_page.dart';
 import 'signin_page.dart';
 import 'firestore_page.dart';
 
@@ -28,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
 
       // Affichage d'un message de réussite à l'aide d'un Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Connexion réussie!'),
           duration: Duration(seconds: 3),
         ),
@@ -49,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
 
       // Affichage d'un message d'erreur à l'aide d'un Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Erreur lors de la connexion'),
           duration: Duration(seconds: 3),
         ),
@@ -73,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       // Barre d'app avec le titre "Connexion"
       appBar: AppBar(
-        title: Text('Connexion'),
+        title: const Text('Connexion'),
       ),
       // Corps de la page avec des champs de saisie d'e-mail et de mot de passe, et des boutons d'action
       body: Padding(
@@ -84,27 +83,27 @@ class _LoginPageState extends State<LoginPage> {
             // Champ de texte pour saisir l'e-mail
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
               keyboardType: TextInputType.emailAddress,
             ),
-            SizedBox(height: 16.0), // Espacement vertical
+            const SizedBox(height: 16.0), // Espacement vertical
             // Champ de texte pour saisir le mot de passe
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Mot de passe'),
+              decoration: const InputDecoration(labelText: 'Mot de passe'),
               obscureText: true, // Mot de passe masqué
             ),
-            SizedBox(height: 32.0), // Espacement vertical
+            const SizedBox(height: 32.0), // Espacement vertical
             // Bouton élevé pour déclencher la connexion
             ElevatedButton(
               onPressed: _login,
-              child: Text('Se connecter'),
+              child: const Text('Se connecter'),
             ),
-            SizedBox(height: 16.0), // Espacement vertical
+            const SizedBox(height: 16.0), // Espacement vertical
             // Bouton de texte pour accéder à la page d'inscription
             TextButton(
               onPressed: _goToRegistration,
-              child: Text('Pas de compte ? S\'inscrire'),
+              child: const Text('Pas de compte ? S\'inscrire'),
             ),
           ],
         ),

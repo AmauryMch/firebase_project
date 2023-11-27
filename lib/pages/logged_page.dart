@@ -9,7 +9,7 @@ class LoggedPage extends StatelessWidget {
   final String userEmail;
 
   // Constructeur qui initialise l'adresse e-mail
-  LoggedPage({required this.userEmail});
+  const LoggedPage({required this.userEmail});
 
   // Méthode de déconnexion de l'utilisateur
   void _logout(BuildContext context) async {
@@ -30,7 +30,7 @@ class LoggedPage extends StatelessWidget {
     return Scaffold(
       // Barre d'app avec le titre "Connexion réussie"
       appBar: AppBar(
-        title: Text('Connexion réussie'),
+        title: const Text('Connexion réussie'),
       ),
       // Corps de la page centré avec des informations sur la connexion et un bouton de déconnexion
       body: Center(
@@ -38,21 +38,21 @@ class LoggedPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Message indiquant que l'utilisateur est connecté
-            Text(
+            const Text(
               'Vous êtes maintenant connecté!',
               style: TextStyle(fontSize: 18.0),
             ),
-            SizedBox(height: 16.0), // Espacement vertical
+            const SizedBox(height: 16.0), // Espacement vertical
             // Affichage de l'adresse e-mail de l'utilisateur
             Text(
               'Email: $userEmail',
-              style: TextStyle(fontSize: 16.0),
+              style: const TextStyle(fontSize: 16.0),
             ),
-            SizedBox(height: 32.0), // Espacement vertical
+            const SizedBox(height: 32.0), // Espacement vertical
             // Bouton élevé pour déclencher la déconnexion
             ElevatedButton(
               onPressed: () => _logout(context),
-              child: Text('Se déconnecter'),
+              child: const Text('Se déconnecter'),
             ),
           ],
         ),
