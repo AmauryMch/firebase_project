@@ -338,6 +338,7 @@ class FirestorePage extends StatelessWidget {
                     'title': titleController.text,
                     'content': contentController.text,
                     'userId': userId,
+                    'imageUrl': newImageUrl,
                   });
 
                   // Afficher un message de confirmation
