@@ -38,6 +38,7 @@ class DetailNotePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 12.0),
+            // Conteneur pour afficher le contenu de la note avec une bordure
             Container(
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
@@ -50,6 +51,7 @@ class DetailNotePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12.0),
+            // Si l'image existe, afficher un conteneur avec l'image et une bordure
             if (imageUrl.isNotEmpty)
               Container(
                 decoration: BoxDecoration(

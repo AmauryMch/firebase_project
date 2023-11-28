@@ -33,8 +33,11 @@ class NotePage extends StatelessWidget {
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        // Écoute des modifications de la collection 'notes' pour l'utilisateur actuel
-        stream: notes.where('userId', isEqualTo: user?.uid).snapshots(),
+        // Écoute des modifications de la collection 'notes' pour l'utilisateur actuel et du plus récent au plus ancien
+        stream: notes
+            .where('userId', isEqualTo: user?.uid)
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Text('Une erreur s\'est produite');
@@ -44,8 +47,12 @@ class NotePage extends StatelessWidget {
             return const Text("Chargement");
           }
           // Affichage de la liste des notes
-          return ListView(
-            children: snapshot.data!.docs.map((DocumentSnapshot document) {
+          return ListView.separated(
+            itemCount: snapshot.data!.docs.length,
+            separatorBuilder: (BuildContext context, int index) =>
+                const Divider(height: 1, color: Colors.grey),
+            itemBuilder: (context, index) {
+              DocumentSnapshot document = snapshot.data!.docs[index];
               Map<String, dynamic> data =
                   document.data()! as Map<String, dynamic>;
               // Composant Dismissible pour permettre la suppression de la note
@@ -95,6 +102,10 @@ class NotePage extends StatelessWidget {
                           ),
                         ),
                       ),
+                      // Afficher l'icône d'image si la note a une image
+                      if (data['imageUrl'] != null &&
+                          data['imageUrl'].isNotEmpty)
+                        Icon(Icons.image),
                       // Checkbox pour marquer la note comme terminée ou non
                       Checkbox(
                         value: data['isCompleted'] ?? false,
@@ -136,7 +147,7 @@ class NotePage extends StatelessWidget {
                   },
                 ),
               );
-            }).toList(),
+            },
           );
         },
       ),

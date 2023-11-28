@@ -76,12 +76,16 @@ void showNoteDialog(
                   ),
                 );
               } else {
+                // Récupérer la date actuelle
+                Timestamp createdAt = Timestamp.now();
+
                 await notes.add({
                   'title': titleController.text,
                   'content': contentController.text,
                   'userId': userId,
                   'isCompleted': false,
                   'imageUrl': imageUrl,
+                  'createdAt': createdAt,
                 });
 
                 titleController.clear();
