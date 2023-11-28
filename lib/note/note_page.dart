@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../auth/loggin_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import '../auth/loggin_page.dart';
 import 'add_note_dialog.dart';
 import 'edit_note_dialog.dart';
+import 'detail_note_page.dart';
 
-// Page principale pour gérer les notes dans Firestore
 class NotePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -24,8 +24,9 @@ class NotePage extends StatelessWidget {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              Navigator.of(context).pushReplacement(
+              Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => LoginPage()),
+                (route) => false,
               );
             },
           ),
@@ -36,26 +37,25 @@ class NotePage extends StatelessWidget {
         stream: notes.where('userId', isEqualTo: user?.uid).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Text('Something went wrong');
+            return const Text('Une erreur s\'est produite');
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text("Loading");
+            return const Text("Chargement");
           }
-
           // Affichage de la liste des notes
           return ListView(
             children: snapshot.data!.docs.map((DocumentSnapshot document) {
               Map<String, dynamic> data =
                   document.data()! as Map<String, dynamic>;
-              String imageUrl = data['imageUrl'] ?? '';
-
               // Composant Dismissible pour permettre la suppression de la note
               return Dismissible(
                 key: Key(document.id),
                 direction: DismissDirection.endToStart,
                 onDismissed: (direction) async {
                   if (direction == DismissDirection.endToStart) {
+                    // Supprimer la note et l'image associée
+                    String imageUrl = data['imageUrl'] ?? '';
                     if (imageUrl.isNotEmpty) {
                       Reference storageReference =
                           FirebaseStorage.instance.refFromURL(imageUrl);
@@ -82,44 +82,27 @@ class NotePage extends StatelessWidget {
                   ),
                 ),
                 child: ListTile(
-                  // Affichage du titre et du contenu de la note
-                  title: Text(
-                    data['title'],
-                    style: TextStyle(
-                      decoration: data['isCompleted'] ?? false
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
-                    ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  title: Row(
                     children: [
-                      Text(
-                        data['content'],
-                        style: TextStyle(
-                          decoration: data['isCompleted'] ?? false
-                              ? TextDecoration.lineThrough
-                              : TextDecoration.none,
+                      // Titre de la note
+                      Expanded(
+                        child: Text(
+                          data['title'],
+                          style: TextStyle(
+                            decoration: data['isCompleted'] ?? false
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                          ),
                         ),
                       ),
-                      if (imageUrl.isNotEmpty)
-                        Image.network(
-                          imageUrl,
-                          height: 100.0,
-                        ),
-                    ],
-                  ),
-
-                  // Cases à cocher et bouton d'édition de la note
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+                      // Checkbox pour marquer la note comme terminée ou non
                       Checkbox(
                         value: data['isCompleted'] ?? false,
                         onChanged: (bool? value) {
                           notes.doc(document.id).update({'isCompleted': value});
                         },
                       ),
+                      // Bouton d'édition de la note si pas terminée
                       if (!(data['isCompleted'] ?? false))
                         IconButton(
                           icon: const Icon(Icons.edit),
@@ -138,6 +121,19 @@ class NotePage extends StatelessWidget {
                         ),
                     ],
                   ),
+                  // Naviguer vers la page de détails de la note lors du clic
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailNotePage(
+                          title: data['title'],
+                          content: data['content'],
+                          imageUrl: data['imageUrl'] ?? '',
+                        ),
+                      ),
+                    );
+                  },
                 ),
               );
             }).toList(),
