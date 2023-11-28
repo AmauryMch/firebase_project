@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
-import 'pages/loggin_page.dart';
+import 'auth/loggin_page.dart';
 
 // Fonction principale qui initialise Firebase et lance l'application
 void main() async {
@@ -35,31 +35,6 @@ class MyApp extends StatelessWidget {
       // Page d'accueil de l'application, dans ce cas, la page de connexion
       home: LoginPage(),
       debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-// Classe représentant la page d'accueil de l'application
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-// Classe d'état pour la page d'accueil de l'application
-class _MyHomePageState extends State<MyHomePage> {
-  // Méthode de construction de l'interface utilisateur de la page d'accueil
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // Barre d'app avec un fond de couleur issu du thème défini
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
     );
   }
 }

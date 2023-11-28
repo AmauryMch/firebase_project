@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'signin_page.dart';
-import 'firestore_page.dart';
+import '../note/note_page.dart';
 
 // Classe représentant la page de connexion
 class LoginPage extends StatefulWidget {
@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
           // builder: (context) => LoggedPage(
           //   userEmail: userCredential.user?.email ?? '',
           // ),
-          builder: (context) => FirestorePage(),
+          builder: (context) => NotePage(),
         ),
       );
     } on FirebaseAuthException catch (e) {
