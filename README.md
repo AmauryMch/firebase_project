@@ -32,22 +32,25 @@ Application Flutter vous permettant de gérer vos notes de manière simple et ef
 ## Utilisation
 
 1. **Connexion :**
-   - Connectez-vous à l'application avec votre compte. Si vous n'avez pas de compte, appuyez sur le bouton "Pas de compte ? S'inscrire". Remplissez les informations nécessaires et appuyez sur "S'inscrire". Vous pouvez maintenant vous connecter.
+   - Connectez-vous à l'application avec votre compte.
 
-2. **Écran principal :**
+2. **Inscription :**
+   - Si vous n'avez pas de compte, appuyez sur "Pas de compte ? S'inscrire" à l'écran de connexion. Remplissez les informations nécessaires, y compris un mot de passe d'au moins 8   caractères avec au moins une majuscule, un caractère spécial et un chiffre, puis appuyez sur "S'inscrire".
+
+3. **Écran principal :**
    - Sur l'écran principal, vous verrez la liste de vos notes existantes.
 
-3. **Ajouter une note :**
+4. **Ajouter une note :**
    - Pour ajouter une nouvelle note, appuyez sur le bouton "+" en bas à droite.
 
-4. **Modifier une note :**
+5. **Modifier une note :**
    - Pour modifier une note existante, appuyez sur le bouton d'édition à côté de la note. Modifiez les détails dans la boîte de dialogue et appuyez sur "Enregistrer". Notez que vous pouvez uniquement modifier les notes non complètes.
 
-5. **Compléter une note :**
+6. **Compléter une note :**
    - Chaque note a une case à cocher à côté du titre. Cochez la case pour indiquer que la note est complète. Le contenu de la note sera barré pour indiquer son achèvement.
 
-6. **Supprimer une note :**
+7. **Supprimer une note :**
    - Pour supprimer une note, faites glisser la note vers la gauche.
 
-7. **Déconnexion :**
+8. **Déconnexion :**
    - Pour vous déconnecter, appuyez sur l'icône de déconnexion dans la barre d'applications.
