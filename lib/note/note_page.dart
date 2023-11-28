@@ -1,17 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/loggin_page.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'add_note_dialog.dart';
+import 'edit_note_dialog.dart';
 
 // Page principale pour gérer les notes dans Firestore
 class NotePage extends StatelessWidget {
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController contentController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     // Référence à la collection Firestore 'notes'
@@ -128,7 +124,7 @@ class NotePage extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.edit),
                           onPressed: () {
-                            _showEditNoteDialog(
+                            showEditNoteDialog(
                               context,
                               notes,
                               user?.uid,
@@ -151,214 +147,10 @@ class NotePage extends StatelessWidget {
       // Bouton flottant pour ajouter une nouvelle note
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _showNoteDialog(context, notes, user?.uid);
+          showNoteDialog(context, notes, user?.uid);
         },
         child: const Icon(Icons.add),
       ),
-    );
-  }
-
-  // Affiche une boîte de dialogue pour ajouter une nouvelle note
-  void _showNoteDialog(
-      BuildContext context, CollectionReference notes, String? userId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String imageUrl = '';
-
-        return AlertDialog(
-          title: const Text('Nouvelle Note'),
-          content: Form(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: titleController,
-                    decoration: const InputDecoration(labelText: 'Titre'),
-                  ),
-                  TextFormField(
-                    controller: contentController,
-                    decoration: const InputDecoration(labelText: 'Contenu'),
-                    maxLines: null,
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final picker = ImagePicker();
-                      final pickedFile =
-                          await picker.pickImage(source: ImageSource.gallery);
-
-                      if (pickedFile != null) {
-                        Reference storageReference = FirebaseStorage.instance
-                            .ref()
-                            .child('images/${DateTime.now().toString()}');
-                        UploadTask uploadTask =
-                            storageReference.putFile(File(pickedFile.path));
-
-                        await uploadTask.whenComplete(() async {
-                          imageUrl = await storageReference.getDownloadURL();
-                        });
-                      } else {
-                        print('Aucune image sélectionnée');
-                      }
-                    },
-                    child: const Text('Uploader l\'image'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            // Bouton d'annulation
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annuler'),
-            ),
-            // Bouton pour enregistrer la nouvelle note
-            ElevatedButton(
-              onPressed: () async {
-                if (titleController.text.trim().isEmpty ||
-                    contentController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Veuillez remplir tous les champs'),
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                } else {
-                  await notes.add({
-                    'title': titleController.text,
-                    'content': contentController.text,
-                    'userId': userId,
-                    'isCompleted': false,
-                    'imageUrl': imageUrl,
-                  });
-
-                  titleController.clear();
-                  contentController.clear();
-
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Enregistrer'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Affiche une boîte de dialogue pour modifier une note existante
-  void _showEditNoteDialog(
-    BuildContext context,
-    CollectionReference notes,
-    String? userId,
-    String title,
-    String content,
-    bool isCompleted,
-    String documentId,
-    String imageUrl,
-  ) {
-    titleController.text = title;
-    contentController.text = content;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String newImageUrl = imageUrl;
-        return AlertDialog(
-          title: const Text('Modifier la Note'),
-          content: Form(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: titleController,
-                    decoration: const InputDecoration(labelText: 'Titre'),
-                  ),
-                  TextFormField(
-                    controller: contentController,
-                    decoration: const InputDecoration(labelText: 'Contenu'),
-                    maxLines: null,
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final picker = ImagePicker();
-                      final pickedFile =
-                          await picker.pickImage(source: ImageSource.gallery);
-
-                      if (pickedFile != null) {
-                        Reference storageReference = FirebaseStorage.instance
-                            .ref()
-                            .child('images/${DateTime.now().toString()}');
-                        UploadTask uploadTask =
-                            storageReference.putFile(File(pickedFile.path));
-
-                        await uploadTask.whenComplete(() async {
-                          newImageUrl = await storageReference.getDownloadURL();
-                        });
-                      } else {
-                        print('Aucune image sélectionnée');
-                      }
-                    },
-                    child: const Text('Modifier l\'image'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            // Bouton d'annulation
-            ElevatedButton(
-              onPressed: () {
-                titleController.clear();
-                contentController.clear();
-
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annuler'),
-            ),
-            // Bouton pour enregistrer les modifications de la note
-            ElevatedButton(
-              onPressed: () async {
-                if (titleController.text.trim().isEmpty ||
-                    contentController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Veuillez remplir tous les champs'),
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                } else {
-                  // Mettre à jour les données de la note dans Firestore
-                  await notes.doc(documentId).update({
-                    'title': titleController.text,
-                    'content': contentController.text,
-                    'userId': userId,
-                    'imageUrl': newImageUrl,
-                  });
-
-                  // Afficher un message de confirmation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Note modifiée avec succès'),
-                    ),
-                  );
-
-                  titleController.clear();
-                  contentController.clear();
-
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Enregistrer'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
