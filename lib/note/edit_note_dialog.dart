@@ -15,104 +15,167 @@ void showEditNoteDialog(
   String documentId,
   String imageUrl,
 ) {
+  // Contrôleurs pour les champs de saisie de titre et de contenu
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
+
+  // Préremplissage des champs de saisie avec les valeurs actuelles
   titleController.text = title;
   contentController.text = content;
 
+  // Barre de progression pour le téléchargement de la nouvelle image
+  double _uploadProgress = 0.0;
+  bool uploadCompleted = false;
+
+  // Affichage de la boîte de dialogue
   showDialog(
     context: context,
     builder: (BuildContext context) {
+      // Variable pour stocker la nouvelle URL de l'image après modification
       String newImageUrl = imageUrl;
-      return AlertDialog(
-        title: const Text('Modifier la Note'),
-        content: Form(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: 'Titre'),
-                ),
-                TextFormField(
-                  controller: contentController,
-                  decoration: const InputDecoration(labelText: 'Contenu'),
-                  maxLines: null,
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    final picker = ImagePicker();
-                    final pickedFile =
-                        await picker.pickImage(source: ImageSource.gallery);
 
-                    if (pickedFile != null) {
-                      Reference storageReference = FirebaseStorage.instance
-                          .ref()
-                          .child('images/${DateTime.now().toString()}');
-                      UploadTask uploadTask =
-                          storageReference.putFile(File(pickedFile.path));
+      // Construction de la boîte de dialogue
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Modifier la Note'),
+            content: Form(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: 'Titre'),
+                    ),
+                    TextFormField(
+                      controller: contentController,
+                      decoration: const InputDecoration(labelText: 'Contenu'),
+                      maxLines: null,
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        // Utilisation de l'ImagePicker pour sélectionner une nouvelle image depuis la galerie
+                        final picker = ImagePicker();
+                        final pickedFile =
+                            await picker.pickImage(source: ImageSource.gallery);
 
-                      await uploadTask.whenComplete(() async {
-                        newImageUrl = await storageReference.getDownloadURL();
-                      });
-                    } else {
-                      print('Aucune image sélectionnée');
-                    }
-                  },
-                  child: const Text('Modifier l\'image'),
+                        if (pickedFile != null) {
+                          // Téléchargement de la nouvelle image vers Firebase Storage
+                          Reference storageReference = FirebaseStorage.instance
+                              .ref()
+                              .child('images/${DateTime.now().toString()}');
+                          UploadTask uploadTask =
+                              storageReference.putFile(File(pickedFile.path));
+
+                          uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+                            setState(() {
+                              _uploadProgress =
+                                  snapshot.bytesTransferred / snapshot.totalBytes;
+                            });
+                          });
+
+                          await uploadTask.whenComplete(() async {
+                            // Mise à jour de l'URL de l'image après téléchargement
+                            newImageUrl = await storageReference.getDownloadURL();
+                            setState(() {
+                              _uploadProgress = 1.0; // Définir la progression à 100% une fois l'upload terminé
+                              uploadCompleted = true; // Indiquer que l'upload est terminé
+                            });
+                          });
+                        } else {
+                          print('Aucune image sélectionnée');
+                        }
+                      },
+                      child: const Text('Modifier l\'image'),
+                    ),
+                    if (_uploadProgress > 0.0)
+                      LinearProgressIndicator(
+                        value: _uploadProgress,
+                        minHeight: 10,
+                        backgroundColor: Colors.grey[300],
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            uploadCompleted ? Colors.green : Colors.blue),
+                      ),
+                    if (_uploadProgress == 1.0)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          '100% Image enregistrée',
+                          style: TextStyle(color: Colors.green),
+                        ),
+                      ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-        actions: [
-          // Bouton d'annulation
-          ElevatedButton(
-            onPressed: () {
-              titleController.clear();
-              contentController.clear();
+            actions: [
+              // Bouton d'annulation
+              ElevatedButton(
+                onPressed: () {
+                  // Effacement des champs de saisie
+                  titleController.clear();
+                  contentController.clear();
 
-              Navigator.of(context).pop();
-            },
-            child: const Text('Annuler'),
-          ),
-          // Bouton pour enregistrer les modifications de la note
-          ElevatedButton(
-            onPressed: () async {
-              if (titleController.text.trim().isEmpty ||
-                  contentController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Veuillez remplir tous les champs'),
-                    duration: Duration(seconds: 3),
-                  ),
-                );
-              } else {
-                // Mettre à jour les données de la note dans Firestore
-                await notes.doc(documentId).update({
-                  'title': titleController.text,
-                  'content': contentController.text,
-                  'userId': userId,
-                  'imageUrl': newImageUrl,
-                });
+                  // Réinitialiser la barre de progression
+                  setState(() {
+                    _uploadProgress = 0.0;
+                    uploadCompleted = false;
+                  });
 
-                // Afficher un message de confirmation
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Note modifiée avec succès'),
-                  ),
-                );
+                  // Fermeture de la boîte de dialogue
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Annuler'),
+              ),
+              // Bouton pour enregistrer les modifications de la note
+              ElevatedButton(
+                onPressed: () async {
+                  // Vérification si les champs obligatoires sont remplis
+                  if (titleController.text.trim().isEmpty ||
+                      contentController.text.trim().isEmpty) {
+                    // Affichage d'un message d'erreur
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Veuillez remplir tous les champs'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  } else {
+                    // Mise à jour des données de la note dans Firestore
+                    await notes.doc(documentId).update({
+                      'title': titleController.text,
+                      'content': contentController.text,
+                      'userId': userId,
+                      'imageUrl': newImageUrl,
+                    });
 
-                titleController.clear();
-                contentController.clear();
+                    // Affichage d'un message de confirmation
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Note modifiée avec succès'),
+                      ),
+                    );
 
-                Navigator.of(context).pop();
-              }
-            },
-            child: const Text('Enregistrer'),
-          ),
-        ],
+                    // Réinitialiser la barre de progression
+                    setState(() {
+                      _uploadProgress = 0.0;
+                      uploadCompleted = false;
+                    });
+
+                    // Effacement des champs de saisie
+                    titleController.clear();
+                    contentController.clear();
+
+                    // Fermeture de la boîte de dialogue
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text('Enregistrer'),
+              ),
+            ],
+          );
+        },
       );
     },
   );

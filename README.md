@@ -35,10 +35,10 @@ Application Flutter vous permettant de gérer vos notes de manière simple et ef
    - Connectez-vous à l'application avec votre compte.
 
 2. **Inscription :**
-   - Si vous n'avez pas de compte, appuyez sur "Pas de compte ? S'inscrire" à l'écran de connexion. Remplissez les informations nécessaires, y compris un mot de passe d'au moins 8   caractères avec au moins une majuscule, un caractère spécial et un chiffre, puis appuyez sur "S'inscrire".
+   - Si vous n'avez pas de compte, appuyez sur "Pas de compte ? S'inscrire" à l'écran de connexion. Remplissez les informations nécessaires. Chaque adresse e-mail peut être associée à un seul compte, et un mot de passe composé d'au moins 8 caractères avec au moins une majuscule, un caractère spécial et un chiffre. Ensuite, appuyez sur "S'inscrire".
 
 3. **Écran principal :**
-   - Sur l'écran principal, vous verrez la liste de vos notes existantes.
+   - Sur l'écran principal, vous verrez la liste de vos notes existantes avec une icône d'image si la note contient une image, une case à cocher pour compléter la note et un bouton de modification.
 
 4. **Ajouter une note :**
    - Pour ajouter une nouvelle note, appuyez sur le bouton "+" en bas à droite.
