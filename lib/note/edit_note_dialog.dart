@@ -31,8 +31,9 @@ void showEditNoteDialog(
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      // Variable pour stocker la nouvelle URL de l'image après modification
-      String newImageUrl = imageUrl;
+      // Variable pour stocker l'ancienne URL de l'image
+      String? previousImageUrl = '';
+      String originalImageUrl = imageUrl;
 
       // Construction de la boîte de dialogue
       return StatefulBuilder(
@@ -61,6 +62,18 @@ void showEditNoteDialog(
                             await picker.pickImage(source: ImageSource.gallery);
 
                         if (pickedFile != null) {
+                          // Supprimer la nouvelle image si l'upload est annulé
+                          if (uploadCompleted && imageUrl.isNotEmpty) {
+                            FirebaseStorage.instance
+                                .refFromURL(imageUrl)
+                                .delete();
+                          }
+
+                          // Restaurer l'ancienne image (si elle existe)
+                          if (previousImageUrl != null) {
+                            imageUrl = previousImageUrl!;
+                          }
+
                           // Téléchargement de la nouvelle image vers Firebase Storage
                           Reference storageReference = FirebaseStorage.instance
                               .ref()
@@ -68,19 +81,23 @@ void showEditNoteDialog(
                           UploadTask uploadTask =
                               storageReference.putFile(File(pickedFile.path));
 
-                          uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+                          uploadTask.snapshotEvents
+                              .listen((TaskSnapshot snapshot) {
                             setState(() {
-                              _uploadProgress =
-                                  snapshot.bytesTransferred / snapshot.totalBytes;
+                              _uploadProgress = snapshot.bytesTransferred /
+                                  snapshot.totalBytes;
                             });
                           });
 
                           await uploadTask.whenComplete(() async {
                             // Mise à jour de l'URL de l'image après téléchargement
-                            newImageUrl = await storageReference.getDownloadURL();
+                            imageUrl = await storageReference.getDownloadURL();
                             setState(() {
-                              _uploadProgress = 1.0; // Définir la progression à 100% une fois l'upload terminé
-                              uploadCompleted = true; // Indiquer que l'upload est terminé
+                              _uploadProgress =
+                                  1.0; // Définir la progression à 100% une fois l'upload terminé
+                              uploadCompleted =
+                                  true; // Indiquer que l'upload est terminé
+                              previousImageUrl = imageUrl;
                             });
                           });
                         } else {
@@ -117,6 +134,11 @@ void showEditNoteDialog(
                   titleController.clear();
                   contentController.clear();
 
+                  // Supprimer la nouvelle image si l'upload est annulé
+                  if (uploadCompleted && imageUrl.isNotEmpty) {
+                    FirebaseStorage.instance.refFromURL(imageUrl).delete();
+                  }
+
                   // Réinitialiser la barre de progression
                   setState(() {
                     _uploadProgress = 0.0;
@@ -142,12 +164,18 @@ void showEditNoteDialog(
                       ),
                     );
                   } else {
+                    // Supprimer l'ancienne image si une nouvelle image a été ajoutée
+                    if (uploadCompleted && originalImageUrl.isNotEmpty) {
+                      await FirebaseStorage.instance
+                          .refFromURL(originalImageUrl)
+                          .delete();
+                    }
                     // Mise à jour des données de la note dans Firestore
                     await notes.doc(documentId).update({
                       'title': titleController.text,
                       'content': contentController.text,
                       'userId': userId,
-                      'imageUrl': newImageUrl,
+                      'imageUrl': imageUrl,
                     });
 
                     // Affichage d'un message de confirmation
