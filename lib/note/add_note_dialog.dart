@@ -117,39 +117,41 @@ void showNoteDialog(
               ),
               // Bouton pour enregistrer la nouvelle note
               ElevatedButton(
-                onPressed: () async {
-                  if (titleController.text.trim().isEmpty ||
-                      contentController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Veuillez remplir tous les champs'),
-                        duration: Duration(seconds: 3),
-                      ),
-                    );
-                  } else {
-                    // Récupérer la date actuelle
-                    Timestamp createdAt = Timestamp.now();
+                onPressed: (_uploadProgress == 1.0)
+                    ? () async {
+                        if (titleController.text.trim().isEmpty ||
+                            contentController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Veuillez remplir tous les champs'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        } else {
+                          // Récupérer la date actuelle
+                          Timestamp createdAt = Timestamp.now();
 
-                    await notes.add({
-                      'title': titleController.text,
-                      'content': contentController.text,
-                      'userId': userId,
-                      'isCompleted': false,
-                      'imageUrl': imageUrl,
-                      'createdAt': createdAt,
-                    });
+                          await notes.add({
+                            'title': titleController.text,
+                            'content': contentController.text,
+                            'userId': userId,
+                            'isCompleted': false,
+                            'imageUrl': imageUrl,
+                            'createdAt': createdAt,
+                          });
 
-                    setState(() {
-                      _uploadProgress = 0.0;
-                      uploadCompleted = false;
-                    });
+                          setState(() {
+                            _uploadProgress = 0.0;
+                            uploadCompleted = false;
+                          });
 
-                    titleController.clear();
-                    contentController.clear();
+                          titleController.clear();
+                          contentController.clear();
 
-                    Navigator.of(context).pop();
-                  }
-                },
+                          Navigator.of(context).pop();
+                        }
+                      }
+                    : null,
                 child: const Text('Enregistrer'),
               ),
             ],

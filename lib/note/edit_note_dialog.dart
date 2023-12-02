@@ -152,53 +152,55 @@ void showEditNoteDialog(
               ),
               // Bouton pour enregistrer les modifications de la note
               ElevatedButton(
-                onPressed: () async {
-                  // Vérification si les champs obligatoires sont remplis
-                  if (titleController.text.trim().isEmpty ||
-                      contentController.text.trim().isEmpty) {
-                    // Affichage d'un message d'erreur
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Veuillez remplir tous les champs'),
-                        duration: Duration(seconds: 3),
-                      ),
-                    );
-                  } else {
-                    // Supprimer l'ancienne image si une nouvelle image a été ajoutée
-                    if (uploadCompleted && originalImageUrl.isNotEmpty) {
-                      await FirebaseStorage.instance
-                          .refFromURL(originalImageUrl)
-                          .delete();
-                    }
-                    // Mise à jour des données de la note dans Firestore
-                    await notes.doc(documentId).update({
-                      'title': titleController.text,
-                      'content': contentController.text,
-                      'userId': userId,
-                      'imageUrl': imageUrl,
-                    });
+                onPressed: (_uploadProgress == 1.0)
+                    ? () async {
+                        // Vérification si les champs obligatoires sont remplis
+                        if (titleController.text.trim().isEmpty ||
+                            contentController.text.trim().isEmpty) {
+                          // Affichage d'un message d'erreur
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Veuillez remplir tous les champs'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        } else {
+                          // Supprimer l'ancienne image si une nouvelle image a été ajoutée
+                          if (uploadCompleted && originalImageUrl.isNotEmpty) {
+                            await FirebaseStorage.instance
+                                .refFromURL(originalImageUrl)
+                                .delete();
+                          }
+                          // Mise à jour des données de la note dans Firestore
+                          await notes.doc(documentId).update({
+                            'title': titleController.text,
+                            'content': contentController.text,
+                            'userId': userId,
+                            'imageUrl': imageUrl,
+                          });
 
-                    // Affichage d'un message de confirmation
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Note modifiée avec succès'),
-                      ),
-                    );
+                          // Affichage d'un message de confirmation
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Note modifiée avec succès'),
+                            ),
+                          );
 
-                    // Réinitialiser la barre de progression
-                    setState(() {
-                      _uploadProgress = 0.0;
-                      uploadCompleted = false;
-                    });
+                          // Réinitialiser la barre de progression
+                          setState(() {
+                            _uploadProgress = 0.0;
+                            uploadCompleted = false;
+                          });
 
-                    // Effacement des champs de saisie
-                    titleController.clear();
-                    contentController.clear();
+                          // Effacement des champs de saisie
+                          titleController.clear();
+                          contentController.clear();
 
-                    // Fermeture de la boîte de dialogue
-                    Navigator.of(context).pop();
-                  }
-                },
+                          // Fermeture de la boîte de dialogue
+                          Navigator.of(context).pop();
+                        }
+                      }
+                    : null,
                 child: const Text('Enregistrer'),
               ),
             ],
