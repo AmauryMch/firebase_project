@@ -13,6 +13,8 @@ void showNoteDialog(
   double _uploadProgress = 0.0;
   bool uploadCompleted = false;
   String previousImageUrl = '';
+  var pickedFile;
+
 
   showDialog(
     context: context,
@@ -38,7 +40,7 @@ void showNoteDialog(
                     ElevatedButton(
                       onPressed: () async {
                         final picker = ImagePicker();
-                        final pickedFile =
+                        pickedFile =
                             await picker.pickImage(source: ImageSource.gallery);
 
                         if (pickedFile != null) {
@@ -117,7 +119,7 @@ void showNoteDialog(
               ),
               // Bouton pour enregistrer la nouvelle note
               ElevatedButton(
-                onPressed: (_uploadProgress == 1.0)
+                onPressed: (pickedFile == null || uploadCompleted)
                     ? () async {
                         if (titleController.text.trim().isEmpty ||
                             contentController.text.trim().isEmpty) {

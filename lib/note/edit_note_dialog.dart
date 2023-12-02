@@ -27,6 +27,7 @@ void showEditNoteDialog(
   double _uploadProgress = 0.0;
   bool uploadCompleted = false;
 
+  var pickedFile;
   // Affichage de la boîte de dialogue
   showDialog(
     context: context,
@@ -58,11 +59,11 @@ void showEditNoteDialog(
                       onPressed: () async {
                         // Utilisation de l'ImagePicker pour sélectionner une nouvelle image depuis la galerie
                         final picker = ImagePicker();
-                        final pickedFile =
+                        pickedFile =
                             await picker.pickImage(source: ImageSource.gallery);
 
                         if (pickedFile != null) {
-                          // Supprimer la nouvelle image si l'upload est annulé
+                          // Supprimer l'image précédente si elle existe
                           if (uploadCompleted && imageUrl.isNotEmpty) {
                             FirebaseStorage.instance
                                 .refFromURL(imageUrl)
@@ -152,7 +153,7 @@ void showEditNoteDialog(
               ),
               // Bouton pour enregistrer les modifications de la note
               ElevatedButton(
-                onPressed: (_uploadProgress == 1.0)
+                onPressed: (pickedFile == null || uploadCompleted)
                     ? () async {
                         // Vérification si les champs obligatoires sont remplis
                         if (titleController.text.trim().isEmpty ||
